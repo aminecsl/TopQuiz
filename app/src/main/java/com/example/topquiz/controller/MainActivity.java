@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.topquiz.R;
+import com.example.topquiz.model.User;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView mGreetingText;
     private EditText mNameInput;
     private Button mPlayButton;
+
+    /* On déclare qu'on aura une instance de la classe User qui permettra de lui affecter le mNameInput au clic sur le bouton*/
+    private User mUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
         mGreetingText = (TextView) findViewById(R.id.activity_main_greeting_txt);
         mNameInput = (EditText) findViewById(R.id.activity_main_name_input);
         mPlayButton = (Button) findViewById(R.id.activity_main_play_btn);
+
+        /*On génère l'instance d'un user*/
+        mUser = new User();
 
         /*Au lancement de l'appli, le bouton est désactivé par défaut*/
         mPlayButton.setEnabled(false);
@@ -60,6 +67,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // The user just clicked
+
+                /*On affecte à l'attribut mFirstName du user la valeur récupérée dans le nNameInput*/
+                String firstName = mNameInput.getText().toString();
+                mUser.setFirstName(firstName);
+
+                /*La classe utilitaire Android Intent permet d'indiquer notre intention de changer d'activity. Son constructeur
+                 *nécessite de lui indiquer l'activity où on se trouve et l'activity sur laquelle on souhaite basculer
+                 */
                 Intent gameActivity = new Intent(MainActivity.this, GameActivity.class);
                 startActivity(gameActivity);
 
