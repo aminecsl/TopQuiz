@@ -1,7 +1,10 @@
 package com.example.topquiz.controller;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +30,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
     //Variable que va stocker la question en cours d'affichage
     private Question mCurrentQuestion;
 
+    //On va stocker le score de l'utilisateur et le nombre de questions qu'on souhaite poser
+    private int mScore;
+    private int mNumberOfQuestions;
+
+    /*On prépare un identifiant pour le paramètre de la méthode intent.putExtra() qui permettra de transférer le score à une
+      une autre activity*/
+    public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +60,10 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerBtn3.setOnClickListener(this);
         mAnswerBtn4.setOnClickListener(this);
 
+        //Au début de la partie, Le score est nul et le nombre de questions restant à poser est à 4 (par exemple)
+        mScore = 0;
+        mNumberOfQuestions = 4;
+
         /*Au lancement de l'activity on initialise notre banque de questions à partir de la méthode generateQuestions()*/
         mQuestionBank = this.generateQuestions();
 
@@ -64,8 +79,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         //On compare ensuite la valeur de ce tag avec celui attendu pour la réponse correcte
         if (responseIndex == mCurrentQuestion.getAnswerIndex()) {
             Toast.makeText(this, "Correct :)", Toast.LENGTH_SHORT).show();
+            //On incrémente le score si la réponse est correcte
+            mScore++;
         }
         else {Toast.makeText(this, "Wrong :(", Toast.LENGTH_SHORT).show();}
+
+        //On décrémente mNumberOfQuestions puis on vérifie si sa valeur est nulle. Auquel cas on arrête le jeu sinon on continue
+        if (--mNumberOfQuestions == 0) {
+            // Termine la partie et affiche une boîte de dialogue...
+            endGame();
+        } else {
+            mCurrentQuestion = mQuestionBank.getQuestion();
+            displayQuestion(mCurrentQuestion);
+        }
     }
 
     private void displayQuestion(final Question question) {
@@ -135,6 +161,25 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 question7,
                 question8,
                 question9));
+
+    }
+
+    private void endGame(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Well done!")
+                .setMessage("Your score is " + mScore)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Ferme l'activité en indiquant au système Android de conserver en mémoire la valeur de mScore
+                        Intent intent = new Intent();
+                        intent.putExtra(BUNDLE_EXTRA_SCORE, mScore);
+                        setResult(RESULT_OK, intent);
+                        finish();
+                    }
+                })
+                .create()
+                .show();
 
     }
 }

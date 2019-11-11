@@ -1,5 +1,6 @@
 package com.example.topquiz.controller;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -16,6 +17,9 @@ import com.example.topquiz.model.User;
 
 public class MainActivity extends AppCompatActivity {
 
+    //On donne un identifiant à une autre activity afin d'y faire référence dans certaines méthodes comme startActivityForResult()
+    public static final int GAME_ACTIVITY_REQUEST_CODE = 99;
+
     /*Pour référencer les éléments graphiques, on commence par déclarer des variables qui leur seront associées :*/
     private TextView mGreetingText;
     private EditText mNameInput;
@@ -23,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     /* On déclare qu'on aura une instance de la classe User qui permettra de lui affecter le mNameInput au clic sur le bouton*/
     private User mUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +80,21 @@ public class MainActivity extends AppCompatActivity {
                 /*La classe utilitaire Android Intent permet d'indiquer notre intention de changer d'activity. Son constructeur
                  *nécessite de lui indiquer l'activity où on se trouve et l'activity sur laquelle on souhaite basculer
                  */
-                Intent gameActivity = new Intent(MainActivity.this, GameActivity.class);
-                startActivity(gameActivity);
-
+                Intent gameActivityIntent = new Intent(MainActivity.this, GameActivity.class);
+                startActivityForResult(gameActivityIntent, GAME_ACTIVITY_REQUEST_CODE);
             }
         });
 
     }
+
+    //C'est cette méthode qui finalement récupère dans la mémoire du système le score transmis depuis la GameActivity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (GAME_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode) {
+            // Fetch the score from the Intent
+            int score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE, 0);
+        }
+    }
+
+    
 }
