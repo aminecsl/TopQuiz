@@ -1,11 +1,14 @@
 package com.example.topquiz.controller;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -27,7 +30,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     /*Notre activity va afficher coup après coup les questions stockées dans notre banque de question*/
     private QuestionBank mQuestionBank;
-    //Variable que va stocker la question en cours d'affichage
+    //Variable qui va stocker la question en cours d'affichage
     private Question mCurrentQuestion;
 
     //On va stocker le score de l'utilisateur et le nombre de questions qu'on souhaite poser
@@ -38,9 +41,19 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
       une autre activity*/
     public static final String BUNDLE_EXTRA_SCORE = "BUNDLE_EXTRA_SCORE";
 
+    //Des identifiants pour sauvegarder dans le système l'état du score et du nombre de questions avant la rotation de l'écran
+    public static final String BUNDLE_STATE_SCORE = "currentScore";
+    public static final String BUNDLE_STATE_QUESTION = "currentQuestion";
+
+    //Variable boolean pour gérer l'activation/désactivation de toute interaction écran pendant la transition entre 2 questions
+    private boolean mEnableTouchEvents;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //Permet de retrouver l'état des valeurs de certaines variables enregistré dans le système quand l'activité est re-create
+        //Nos variables concernées sont indiquées à la ligne 97
         super.onCreate(savedInstanceState);
+        //Affiche l'activité sur l'écran
         setContentView(R.layout.activity_game);
 
         mQuestionText = (TextView) findViewById(R.id.activity_game_question_txt);
@@ -60,17 +73,33 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerBtn3.setOnClickListener(this);
         mAnswerBtn4.setOnClickListener(this);
 
-        //Au début de la partie, Le score est nul et le nombre de questions restant à poser est à 4 (par exemple)
-        mScore = 0;
-        mNumberOfQuestions = 4;
-
         /*Au lancement de l'activity on initialise notre banque de questions à partir de la méthode generateQuestions()*/
-        mQuestionBank = this.generateQuestions();
+        mQuestionBank = generateQuestions();
 
         mCurrentQuestion = mQuestionBank.getQuestion();
         this.displayQuestion(mCurrentQuestion);
 
+        //Les interactions avec l'écran sont possibles par défaut
+        mEnableTouchEvents = true;
+
+        //Si l'activité est re-created (rotation d'écran par ex) on vérifie si certaines variables sont sauvegardés dans le syst
+        if (savedInstanceState != null) {
+            mScore = savedInstanceState.getInt(BUNDLE_STATE_SCORE);
+            mNumberOfQuestions = savedInstanceState.getInt(BUNDLE_STATE_QUESTION);
+        } else {
+            //Au début de la partie, le score est nul et le nombre de questions restant à poser est à 4 (par exemple)
+            mScore = 0;
+            mNumberOfQuestions = 4;
         }
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(BUNDLE_STATE_SCORE, mScore);
+        outState.putInt(BUNDLE_STATE_QUESTION, mNumberOfQuestions);
+        super.onSaveInstanceState(outState);
+    }
 
     @Override
     public void onClick(View v) {
@@ -81,17 +110,37 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, "Correct :)", Toast.LENGTH_SHORT).show();
             //On incrémente le score si la réponse est correcte
             mScore++;
-        }
-        else {Toast.makeText(this, "Wrong :(", Toast.LENGTH_SHORT).show();}
-
-        //On décrémente mNumberOfQuestions puis on vérifie si sa valeur est nulle. Auquel cas on arrête le jeu sinon on continue
-        if (--mNumberOfQuestions == 0) {
-            // Termine la partie et affiche une boîte de dialogue...
-            endGame();
         } else {
-            mCurrentQuestion = mQuestionBank.getQuestion();
-            displayQuestion(mCurrentQuestion);
+            Toast.makeText(this, "Wrong :(", Toast.LENGTH_SHORT).show();
         }
+
+        //On désactive toute interaction avec l'écran après envoi d'une réponse
+        mEnableTouchEvents = false;
+
+        //Méthode permettant simplement d'instaurer un délai d'attente en ms avant d'exectuer les instructions passées
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                //On réactive les interactions avec l'écran
+                mEnableTouchEvents = true;
+
+                //Décrémente mNumberOfQuestions puis vérifie si sa valeur est nulle. Auquel cas arrête le jeu sinon on continue
+                if (--mNumberOfQuestions == 0) {
+                    // Termine la partie et affiche une boîte de dialogue...
+                    endGame();
+                } else {
+                    mCurrentQuestion = mQuestionBank.getQuestion();
+                    displayQuestion(mCurrentQuestion);
+                }
+            }
+        }, 2000);
+    }
+
+    //Cette méthode est appelée chaque fois que l'utilisateur touche l'écran
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return mEnableTouchEvents && super.dispatchTouchEvent(ev);
     }
 
     private void displayQuestion(final Question question) {
@@ -102,7 +151,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         mAnswerBtn4.setText(question.getChoiceList().get(3));
     }
 
-    public QuestionBank generateQuestions () {
+    public QuestionBank generateQuestions() {
 
         Question question1 = new Question("Who is the creator of Android?",
                 Arrays.asList("Andy Rubin",
@@ -164,7 +213,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void endGame(){
+    private void endGame() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Well done!")
                 .setMessage("Your score is " + mScore)
@@ -182,4 +231,5 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 .show();
 
     }
+
 }

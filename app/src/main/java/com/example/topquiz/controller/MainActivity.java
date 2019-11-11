@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
     /* On déclare qu'on aura une instance de la classe User qui permettra de lui affecter le mNameInput au clic sur le bouton*/
     private User mUser;
 
+    /*La variable d'instance de la SharedPreferences API (sauvegarder des données dans la mémoire du device) et les clés des
+      données qui m'intéressent*/
+    private SharedPreferences mPreferences;
+    public static final String PREF_KEY_SCORE = "PREF_KEY_SCORE";
+    public static final String PREF_KEY_FIRSTNAME = "PREF_KEY_FIRSTNAME";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
         /*On génère l'instance d'un user*/
         mUser = new User();
 
+        /*On initialise l'instance de la SharedPreferences API*/
+        mPreferences = getPreferences(MODE_PRIVATE);
+
         /*Au lancement de l'appli, le bouton est désactivé par défaut*/
         mPlayButton.setEnabled(false);
+
+        //Par contre si on a déjà joué, on va récupérer et afficher le prénom, le score, pré-remplir l'input et activer le bouton
+        greetUser();
 
         /*Pour être notifié lorsque l'utilisateur commence à saisir du texte dans le champ EditText. on place un listener*/
         mNameInput.addTextChangedListener(new TextWatcher() {
@@ -77,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
                 String firstName = mNameInput.getText().toString();
                 mUser.setFirstName(firstName);
 
+                //On enregistre dans la mémoire du device, grâce à la SharePreferences API, le prénom du joueur
+                mPreferences.edit().putString(PREF_KEY_FIRSTNAME, mUser.getFirstName()).apply();
+
                 /*La classe utilitaire Android Intent permet d'indiquer notre intention de changer d'activity. Son constructeur
                  *nécessite de lui indiquer l'activity où on se trouve et l'activity sur laquelle on souhaite basculer
                  */
@@ -93,8 +109,29 @@ public class MainActivity extends AppCompatActivity {
         if (GAME_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode) {
             // Fetch the score from the Intent
             int score = data.getIntExtra(GameActivity.BUNDLE_EXTRA_SCORE, 0);
+
+            //On enregistre dans la mémoire du device, grâce à la SharePreferences API, le dernier score du joueur
+            mPreferences.edit().putInt(PREF_KEY_SCORE, score).apply();
+
+            greetUser();
         }
     }
 
-    
+    private void greetUser() {
+        String firstname = mPreferences.getString(PREF_KEY_FIRSTNAME, null);
+
+        if (null != firstname) {
+            int score = mPreferences.getInt(PREF_KEY_SCORE, 0);
+
+            String fulltext = "Welcome back, " + firstname
+                    + "!\nYour last score was " + score
+                    + ", will you do better this time?";
+            mGreetingText.setText(fulltext);
+            mNameInput.setText(firstname);
+            mNameInput.setSelection(firstname.length());
+            mPlayButton.setEnabled(true);
+        }
+    }
+
+
 }
