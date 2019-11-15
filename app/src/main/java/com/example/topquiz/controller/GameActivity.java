@@ -50,11 +50,14 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        //Permet de retrouver l'état des valeurs de certaines variables enregistré dans le système quand l'activité est re-create
+        /*Permet de retrouver les valeurs de certaines variables enregistrées dans le système quand l'activité est re-onCreate
+          notamment après une rotation de l'écran*/
         //Nos variables concernées sont indiquées à la ligne 97
         super.onCreate(savedInstanceState);
         //Affiche l'activité sur l'écran
         setContentView(R.layout.activity_game);
+        //Trace pour monitorer l'état Created du cycle de vie de l'activité
+        System.out.println("GameActivity::onCreate()");
 
         mQuestionText = (TextView) findViewById(R.id.activity_game_question_txt);
         mAnswerBtn1 = (Button) findViewById(R.id.activity_game_answer_btn_1);
@@ -94,6 +97,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    //On force le système Android pour qu'il sauvgarde à tout instant les valeurs de nos variables mScore et mNumberOfQuestions
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putInt(BUNDLE_STATE_SCORE, mScore);
@@ -137,7 +141,7 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
         }, 2000);
     }
 
-    //Cette méthode est appelée chaque fois que l'utilisateur touche l'écran
+    //Méthode appelée chaque fois que l'utilisateur touche l'écran. On gère ainsi quand les intéractions sont possibles ou pas :
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return mEnableTouchEvents && super.dispatchTouchEvent(ev);
@@ -230,6 +234,42 @@ public class GameActivity extends AppCompatActivity implements View.OnClickListe
                 .create()
                 .show();
 
+    }
+
+    //Traces pour monitorer les différents états du cycle de vie de l'activité
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        System.out.println("GameActivity::onStart()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        System.out.println("GameActivity::onResume()");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        System.out.println("GameActivity::onPause()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        System.out.println("GameActivity::onStop()");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        System.out.println("GameActivity::onDestroy()");
     }
 
 }

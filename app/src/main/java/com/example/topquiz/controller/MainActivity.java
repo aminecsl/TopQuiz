@@ -40,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        //Trace pour monitorer l'état Created du cycle de vie de l'activité
+        System.out.println("MainActivity::onCreate()");
 
         /*On assigne à nos variables les éléments de notre interface à l'aide de la méthode findViewById qui récupère chaque
          *élément via son id présent dans le fichier layout correspondant :*/
@@ -133,5 +135,40 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Traces pour monitorer les différents états du cycle de vie de l'activité
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        System.out.println("MainActivity::onStart()");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        System.out.println("MainActivity::onResume()");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        System.out.println("MainActivity::onPause()");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        System.out.println("MainActivity::onStop()");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        System.out.println("MainActivity::onDestroy()");
+    }
 
 }
