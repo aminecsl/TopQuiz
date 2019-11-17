@@ -1,5 +1,7 @@
 package com.example.topquiz.controller;
 
+import com.example.topquiz.TinyDB;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,6 +18,13 @@ import android.widget.TextView;
 import com.example.topquiz.R;
 import com.example.topquiz.model.User;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class MainActivity extends AppCompatActivity {
 
     //On donne un identifiant à une autre activity afin d'y faire référence dans certaines méthodes comme startActivityForResult()
@@ -25,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mGreetingText;
     private EditText mNameInput;
     private Button mPlayButton;
+    private Button mRankingButton;
 
     /* On déclare qu'on aura une instance de la classe User qui permettra de lui affecter le mNameInput au clic sur le bouton*/
     private User mUser;
@@ -34,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences mPreferences;
     public static final String PREF_KEY_SCORE = "PREF_KEY_SCORE";
     public static final String PREF_KEY_FIRSTNAME = "PREF_KEY_FIRSTNAME";
+
+    //La variable d'instance de TinyDB et La clé pour identifier notre liste de joueurs dans l'objet TinyDB
+    public TinyDB mTinydb;
+    //public static final String TINYDB_KEY_PLAYERS_LIST = "TINYDB_KEY_PLAYERS_LIST";
+
+    private UserRepository mUserRepository;
 
 
     @Override
@@ -48,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         mGreetingText = (TextView) findViewById(R.id.activity_main_greeting_txt);
         mNameInput = (EditText) findViewById(R.id.activity_main_name_input);
         mPlayButton = (Button) findViewById(R.id.activity_main_play_btn);
+        mRankingButton = (Button) findViewById(R.id.activity_main_ranking_btn);
 
         /*On génère l'instance d'un user*/
         mUser = new User();
@@ -55,8 +72,15 @@ public class MainActivity extends AppCompatActivity {
         /*On initialise l'instance de la SharedPreferences API*/
         mPreferences = getPreferences(MODE_PRIVATE);
 
+        //On initialise l'instance de notre TinyDB
+        mTinydb = new TinyDB(this);
+
+        mUserRepository = new UserRepository(mTinydb);
+
+
         /*Au lancement de l'appli, le bouton est désactivé par défaut*/
         mPlayButton.setEnabled(false);
+
 
         //Par contre si on a déjà joué, on va récupérer et afficher le prénom, le score, pré-remplir l'input et activer le bouton
         greetUser();
@@ -67,17 +91,13 @@ public class MainActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 /*C'est là qu'on écoute la saisie de caractères dans l'élément EditText et qu'on active le Button*/
                 mPlayButton.setEnabled(s.toString().length() != 0);
-
             }
-
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
@@ -103,6 +123,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mRankingButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent playersRankingActivity = new Intent(MainActivity.this, PlayersRankingActivity.class);
+                startActivity(playersRankingActivity);
+            }
+        });
+
     }
 
     //C'est cette méthode qui finalement récupère dans la mémoire du système le score transmis depuis la GameActivity
@@ -114,6 +142,38 @@ public class MainActivity extends AppCompatActivity {
 
             //On enregistre dans la mémoire du device, grâce à la SharePreferences API, le dernier score du joueur
             mPreferences.edit().putInt(PREF_KEY_SCORE, score).apply();
+
+            //Après la partie, si on n'a pas encore d'historique de joueurs, on initialise et sauvegarde notre mPlayersList dans TinyDB
+            //mPlayersListOnTiny = (ArrayList) mTinydb.getListObject(TINYDB_KEY_PLAYERS_LIST, User.class);
+            mUser.setUserScore(score);
+            ArrayList<User> players = mUserRepository.getPlayersList();
+            System.out.println(players);
+
+            boolean founded = false;
+            for (User player : players){
+                if (player.getFirstName().equals(mUser.getFirstName())){
+                    founded = true;
+                    if (player.getUserScore() < mUser.getUserScore()){
+                        player.setUserScore(mUser.getUserScore());
+                    }
+                }
+            }
+
+            if (founded == false) {
+                players.add(mUser);
+            }
+
+
+            players.sort((a, b) -> a.getUserScore() > b.getUserScore()?-1:1);
+
+            if (players.size() >= 5) {
+                players = new ArrayList<User>(players.subList(0, 5));
+            }
+
+            System.out.println(players);
+            mUserRepository.setPlayersList(players);
+            System.out.println(mUserRepository.getPlayersList());
+
 
             greetUser();
         }
