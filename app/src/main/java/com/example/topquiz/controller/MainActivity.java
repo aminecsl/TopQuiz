@@ -77,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
 
         mUserRepository = new UserRepository(mTinydb);
 
-
         /*Au lancement de l'appli, le bouton est désactivé par défaut*/
         mPlayButton.setEnabled(false);
 
@@ -143,34 +142,41 @@ public class MainActivity extends AppCompatActivity {
             //On enregistre dans la mémoire du device, grâce à la SharePreferences API, le dernier score du joueur
             mPreferences.edit().putInt(PREF_KEY_SCORE, score).apply();
 
-            //Après la partie, si on n'a pas encore d'historique de joueurs, on initialise et sauvegarde notre mPlayersList dans TinyDB
-            //mPlayersListOnTiny = (ArrayList) mTinydb.getListObject(TINYDB_KEY_PLAYERS_LIST, User.class);
+            //Après la partie, on met à jour le score de notre objet joueur avec le score réceptionné depuis la GameActivity
             mUser.setUserScore(score);
-            ArrayList<User> players = mUserRepository.getPlayersList();
-            System.out.println(players);
 
-            boolean founded = false;
+            //On appelle notre liste de joueurs sauvegardée
+            ArrayList<User> players = mUserRepository.getPlayersList();
+
+            /*On vérifie dans notre liste sauvegardée s'il existe déjà un joueur du même nom en comparant avec une boucle for each le nom de
+            chaque joueur existant avec le nom du joueur actuel*/
+            boolean samePlayerExists = false;
             for (User player : players){
                 if (player.getFirstName().equals(mUser.getFirstName())){
-                    founded = true;
+                    samePlayerExists = true;
+                    /*Si le joueur existe déjà, on vérifie si son score existant est inférieur à son nouveau score. Si c'est le cas, on met
+                    * à jour son score avec le nouveau qui est plus élévé*/
                     if (player.getUserScore() < mUser.getUserScore()){
                         player.setUserScore(mUser.getUserScore());
                     }
                 }
             }
 
-            if (founded == false) {
+            /*Si après la boucle on constate que le joueur n'exite pas, on l'ajoute dans notre liste de joueurs sauvegardée*/
+            if (samePlayerExists == false) {
                 players.add(mUser);
             }
 
-
+            /*On trie après chaque partie notre liste de joueurs du score le plus haut au score le plus faible*/
             players.sort((a, b) -> a.getUserScore() > b.getUserScore()?-1:1);
 
+            /*On ne conserve dans notre historique/liste de joueurs que les 5 premiers*/
             if (players.size() >= 5) {
                 players = new ArrayList<User>(players.subList(0, 5));
             }
 
             System.out.println(players);
+            /*On sauvegarde la nouvelle mouture de notre liste de joueurs dans la mémoire*/
             mUserRepository.setPlayersList(players);
             System.out.println(mUserRepository.getPlayersList());
 
@@ -201,6 +207,12 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         System.out.println("MainActivity::onStart()");
+
+        /*Bouton d'accès au classement des joueurs désactivé si on n'a pas au moins 5 joueurs qui ont déjà joué. Placé ici afin que la
+        * visibilité du bouton puisse être rafraîchie au retour sur la MainActivity sans devoir fermer et rouvrir l'application*/
+        if (mUserRepository.getPlayersList().size() >= 5){
+            mRankingButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

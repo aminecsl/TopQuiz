@@ -26,10 +26,6 @@ public class PlayersRankingActivity extends AppCompatActivity {
     private ArrayList<User> mRankingList;
     private UserRepository mUserRepository;
 
-    /*On crée une première liste dans laquelle on va déjà ajouter tous les joueurs uniques qui ont joué et la mettre à jour à partir de la
-      MainActivity quand ils battent leur propre score:*/
-    //public ArrayList<User> mPlayersList = new ArrayList<>();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

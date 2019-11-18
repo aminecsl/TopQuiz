@@ -39,6 +39,7 @@
         android:text="show 5 best players &#9819;"
         android:layout_marginTop="20dp"
         android:padding="30dp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_gravity="center_horizontal"
+        android:visibility="invisible"/>
 
 </LinearLayout>

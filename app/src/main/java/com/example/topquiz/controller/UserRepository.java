@@ -8,17 +8,21 @@ import java.util.ArrayList;
 /**
  * Created by Amine K. on 17/11/19.
  */
+
+/*On met en place une classe qui va gérer nos actions sur l'historique de joueurs*/
 public class UserRepository {
 
+    /*Elle comporte en attribut une instance de TinyDB et une clé String pour identifier notre liste de joueurs dans la mémoire*/
     private TinyDB mTinydb;
     private static final String TINYDB_KEY_PLAYERS_LIST = "TINYDB_KEY_PLAYERS_LIST";
 
 
     public UserRepository(TinyDB mtinyDb) {
+
         mTinydb =  mtinyDb;
     }
 
-
+    /*Notre méthode pour récupérer notre liste de joueurs dans la mémoire*/
     public ArrayList<User> getPlayersList(){
         ArrayList<Object> playerObjects = mTinydb.getListObject(TINYDB_KEY_PLAYERS_LIST, User.class);
         ArrayList<User> players = new ArrayList<User>();
@@ -34,6 +38,7 @@ public class UserRepository {
         return players;
     }
 
+    /*Notre méthode pour mettre à jour notre liste*/
     public void setPlayersList(ArrayList<User> players){
 
         ArrayList<Object> playerObjects = new ArrayList<Object>();
