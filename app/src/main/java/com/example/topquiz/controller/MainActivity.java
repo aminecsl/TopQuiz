@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
     //La variable d'instance de TinyDB et La clé pour identifier notre liste de joueurs dans l'objet TinyDB
     public TinyDB mTinydb;
-    //public static final String TINYDB_KEY_PLAYERS_LIST = "TINYDB_KEY_PLAYERS_LIST";
 
     private UserRepository mUserRepository;
 
@@ -77,9 +76,11 @@ public class MainActivity extends AppCompatActivity {
 
         mUserRepository = new UserRepository(mTinydb);
 
+        //Pour reset notre historique de joueurs
+        //mUserRepository.setPlayersList(null);
+
         /*Au lancement de l'appli, le bouton est désactivé par défaut*/
         mPlayButton.setEnabled(false);
-
 
         //Par contre si on a déjà joué, on va récupérer et afficher le prénom, le score, pré-remplir l'input et activer le bouton
         greetUser();
@@ -170,12 +171,11 @@ public class MainActivity extends AppCompatActivity {
             /*On trie après chaque partie notre liste de joueurs du score le plus haut au score le plus faible*/
             players.sort((a, b) -> a.getUserScore() > b.getUserScore()?-1:1);
 
-            /*On ne conserve dans notre historique/liste de joueurs que les 5 premiers*/
+            /*Si notre liste de joueurs contient + de 5 joueurs, on ne conserve que les 5 premiers*/
             if (players.size() >= 5) {
                 players = new ArrayList<User>(players.subList(0, 5));
             }
 
-            System.out.println(players);
             /*On sauvegarde la nouvelle mouture de notre liste de joueurs dans la mémoire*/
             mUserRepository.setPlayersList(players);
             System.out.println(mUserRepository.getPlayersList());
@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
 
         /*Bouton d'accès au classement des joueurs désactivé si on n'a pas au moins 5 joueurs qui ont déjà joué. Placé ici afin que la
         * visibilité du bouton puisse être rafraîchie au retour sur la MainActivity sans devoir fermer et rouvrir l'application*/
-        if (mUserRepository.getPlayersList().size() >= 5){
+        if (mUserRepository.getPlayersList().size() >= 1){
             mRankingButton.setVisibility(View.VISIBLE);
         }
     }

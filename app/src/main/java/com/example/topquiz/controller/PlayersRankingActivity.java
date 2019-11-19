@@ -12,6 +12,7 @@ import com.example.topquiz.TinyDB;
 import com.example.topquiz.model.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class PlayersRankingActivity extends AppCompatActivity {
 
@@ -20,6 +21,11 @@ public class PlayersRankingActivity extends AppCompatActivity {
     private TextView mTop3Text;
     private TextView mTop4Text;
     private TextView mTop5Text;
+
+    /*On met les TextViews dans une liste pour itérer dedans à la méthode setTextOnView(). On pourra ainsi afficher nos joueurs même si on
+    en a moins que de TextViews*/
+    private ArrayList<TextView> mTopTextViews;
+
     private Button mSortByScoreBtn;
     private Button mSortByNameBtn;
 
@@ -39,6 +45,9 @@ public class PlayersRankingActivity extends AppCompatActivity {
         mTop5Text = (TextView) findViewById(R.id.activity_players_ranking_top5_txt);
         mSortByScoreBtn = (Button) findViewById(R.id.activity_players_ranking_sortByScore_btn);
         mSortByNameBtn = (Button) findViewById(R.id.activity_players_ranking_sortByName_btn);
+
+        //On met les TextViews dans une liste pour itérer dedans à la méthode setTextOnView()
+        mTopTextViews = new ArrayList<>(Arrays.asList(mTop1Text, mTop2Text, mTop3Text, mTop4Text, mTop5Text));
 
         TinyDB mTinyDB = new TinyDB(this);
         mUserRepository = new UserRepository(mTinyDB);
@@ -78,10 +87,10 @@ public class PlayersRankingActivity extends AppCompatActivity {
     }
 
     private void setTextOnView(){
-        mTop1Text.setText(mRankingList.get(0).getFirstName() + " : " + mRankingList.get(0).getUserScore());
-        mTop2Text.setText(mRankingList.get(1).getFirstName() + " : " + mRankingList.get(1).getUserScore());
-        mTop3Text.setText(mRankingList.get(2).getFirstName() + " : " + mRankingList.get(2).getUserScore());
-        mTop4Text.setText(mRankingList.get(3).getFirstName() + " : " + mRankingList.get(3).getUserScore());
-        mTop5Text.setText(mRankingList.get(4).getFirstName() + " : " + mRankingList.get(4).getUserScore());
+        int mRankingListSize = mRankingList.size();
+        for (int i=0; i<mRankingListSize; i++){
+            mTopTextViews.get(i).setText(mRankingList.get(i).getFirstName() + " : " + mRankingList.get(i).getUserScore());
+        }
     }
+
 }
