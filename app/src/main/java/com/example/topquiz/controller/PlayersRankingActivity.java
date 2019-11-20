@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.example.topquiz.R;
 import com.example.topquiz.TinyDB;
 import com.example.topquiz.model.User;
+import com.example.topquiz.model.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;

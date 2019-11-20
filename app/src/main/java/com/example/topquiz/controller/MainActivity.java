@@ -17,13 +17,9 @@ import android.widget.TextView;
 
 import com.example.topquiz.R;
 import com.example.topquiz.model.User;
+import com.example.topquiz.model.UserRepository;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -208,11 +204,6 @@ public class MainActivity extends AppCompatActivity {
 
         System.out.println("MainActivity::onStart()");
 
-        /*Bouton d'accès au classement des joueurs désactivé si on n'a pas au moins 5 joueurs qui ont déjà joué. Placé ici afin que la
-        * visibilité du bouton puisse être rafraîchie au retour sur la MainActivity sans devoir fermer et rouvrir l'application*/
-        if (mUserRepository.getPlayersList().size() >= 1){
-            mRankingButton.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
@@ -220,6 +211,12 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         System.out.println("MainActivity::onResume()");
+
+        /*Bouton d'accès au classement des joueurs désactivé si on n'a pas au moins 5 joueurs qui ont déjà joué. Placé ici afin que la
+         * visibilité du bouton puisse être rafraîchie au retour sur la MainActivity sans devoir fermer et rouvrir l'application*/
+        if (mUserRepository.getPlayersList().size() >= 1){
+            mRankingButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override

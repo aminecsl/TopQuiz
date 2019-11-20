@@ -1,4 +1,4 @@
-package com.example.topquiz.controller;
+package com.example.topquiz.model;
 
 import com.example.topquiz.TinyDB;
 import com.example.topquiz.model.User;
