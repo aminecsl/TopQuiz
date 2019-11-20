@@ -1,4 +1,4 @@
-package com.example.topquiz.view;
+package com.example.topquiz.controller;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,7 +9,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.topquiz.R;
 import com.example.topquiz.model.User;
+import com.example.topquiz.view.RankingPlayerViewHolder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,6 +24,7 @@ public class PlayerAdapter extends RecyclerView.Adapter<RankingPlayerViewHolder>
 
     // CONSTRUCTOR
     public PlayerAdapter(List<User> mPlayers) {
+
         this.mPlayers = mPlayers;
     }
 
@@ -45,6 +48,11 @@ public class PlayerAdapter extends RecyclerView.Adapter<RankingPlayerViewHolder>
     @Override
     public int getItemCount() {
         return this.mPlayers.size();
+    }
+
+    public void refreshData(ArrayList<User> users){
+        mPlayers = users;
+        notifyDataSetChanged();
     }
 
 }
